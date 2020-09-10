@@ -11,19 +11,34 @@ from Bio.Alphabet import generic_dna
 # sequence to find possible enzyme sites, given a desired scrolling
 # window length.
 class EnzymeChooser:
+    # dictionary for the nucleotide ambiguity codes
+    nucleotideEqualities = {
+        "N": ["A", "C", "G", "T"],
+        "B": ["C", "G", "T"],
+        "D": ["A", "G", "T"]
+        "H": ["A", "C", "T"]
+        "V": ["A", "C", "G"]
+        "W": ["A", "T"]
+        "S": ["C", "G"]
+        "R": ["A", "G"]
+        "Y": ["C", "T"]
+        "M": ["A", "C"]
+        "K": ["G", "T"]
+    }
     def __init__(self, inputSeq, enzymeFile, windowLength):
         # dictionary of codons to amino acids
         self.fwdTable = CodonTable.standard_dna_table.forward_table
         self.inputSeq = inputSeq
         self.enzymeFile = enzymeFile
         self.windowLength = windowLength
-        # dictionary of the enzymes we get from the file
-        self.enzymes = {}
         # list of lists with the possible codons for each codon
         self.permutationsList = []
         # output dict with enzymes as the keys, then the value is
-        # a tuple: (replacement sequence, enzyme starting index)
-        self.validEnzymes = {}
+        # a tuple: (replacement sequence, shortened replacement sequence,
+        # enzyme starting index) shortened means the leading and trailing
+        # N's have been stripped from the sequence.
+        # if the starting index is -1, then the enzyme hasn't been found
+        self.enzymes = {}
 
     # make a dictionary of enzymes and their sequences
     def __makeEnzymesDict(self):
@@ -31,7 +46,8 @@ class EnzymeChooser:
         for line in enzymeLineList:
             splitLine = line.split()
             # key: enzyme, value: sequence
-            self.enzymes[splitLine[0]] = splitLine[1]
+            self.enzymes[splitLine[0]] = (splitLine[1], \
+                splitLine[1].split("N"), -1)
 
     # make the list of all codons that could be interchanged
     # at each codon place while keeping the overall codons the same
@@ -42,7 +58,25 @@ class EnzymeChooser:
                 [k for k,v in self.fwdTable.items() if v == c])
 
     # compares two sequences using the compare dictionary
-    #def compareSequences(self, s1, s2):
+    def __compareSequences(self, s1, s2):
+        if len(s1) != len(s2):
+            return False
+        for i in range(len(s1)):
+            if s1[i] == s2[i] or s2[i] in nucleotideEqualities[s1[i]]:
+                continue
+            else:
+                return False
+        return True
+
+    # since we want to make the permuation that does the least
+    # work for each enzyme, we want the sequence that is closest
+    # to the original sequence
+    def __calculateSequenceDifferences(self, sequence):
+        differences = 0
+        for i in range(len(sequence)):
+            if sequence[i] != self.inputSeq:
+                differences += 1
+        return differences
 
     # searching for enzymes using a scrolling window of windowLength
     # returns a list of enzymes and the location that they start at
@@ -53,11 +87,20 @@ class EnzymeChooser:
         if (windowEnd > len(sequence)):
             windowEnd = len(sequence)
         while (windowEnd <= len(sequence)):
-            print("HI")
+            slice = sequence[windowStart:windowEnd]
+            for i in range(len(slice)):
+                lengthLeft = self.windowLength - i
+                for key in self.enzymes:
+                    # if the enzyme won't fit, we move on to the next
+                    if len(self.enzymeFile[key][1]) > lengthLeft:
+                        continue
+            windowStart += 1
+            windowEnd += 1
+
 
     # recursive function that goes through possible permutations
     # and stores the previous permutations in previousIndicies
-    def __permutate(self, previousIndicies, currentIndex):
+    def __permutateAndSearch(self, previousIndicies, currentIndex):
         # We have completed a permuation
         if (currentIndex == len(self.permutationsList)):
             newSequence = ""
