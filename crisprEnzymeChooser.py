@@ -15,15 +15,15 @@ class EnzymeChooser:
     nucleotideEqualities = {
         "N": ["A", "C", "G", "T"],
         "B": ["C", "G", "T"],
-        "D": ["A", "G", "T"]
-        "H": ["A", "C", "T"]
-        "V": ["A", "C", "G"]
-        "W": ["A", "T"]
-        "S": ["C", "G"]
-        "R": ["A", "G"]
-        "Y": ["C", "T"]
-        "M": ["A", "C"]
-        "K": ["G", "T"]
+        "D": ["A", "G", "T"],
+        "H": ["A", "C", "T"],
+        "V": ["A", "C", "G"],
+        "W": ["A", "T"],
+        "S": ["C", "G"],
+        "R": ["A", "G"],
+        "Y": ["C", "T"],
+        "M": ["A", "C"],
+        "K": ["G", "T"],
     }
     def __init__(self, inputSeq, enzymeFile, windowLength):
         # dictionary of codons to amino acids
@@ -34,7 +34,8 @@ class EnzymeChooser:
         # list of lists with the possible codons for each codon
         self.permutationsList = []
         # output dict with enzymes as the keys, then the value is
-        # a tuple: (replacement sequence, shortened replacement sequence,
+        # a tuple: (binding sequence, shortened binding sequence, least-
+        # different input sequence permutation (defaults to empty string),
         # enzyme starting index) shortened means the leading and trailing
         # N's have been stripped from the sequence.
         # if the starting index is -1, then the enzyme hasn't been found
@@ -47,7 +48,7 @@ class EnzymeChooser:
             splitLine = line.split()
             # key: enzyme, value: sequence
             self.enzymes[splitLine[0]] = (splitLine[1], \
-                splitLine[1].split("N"), -1)
+                splitLine[1].split("N"), "", -1)
 
     # make the list of all codons that could be interchanged
     # at each codon place while keeping the overall codons the same
@@ -84,16 +85,36 @@ class EnzymeChooser:
     def __searchForEnzymes(self, sequence):
         windowStart = 0
         windowEnd = self.windowLength
+        sequenceDiff = self.__calculateSequenceDifferences(sequence)
         if (windowEnd > len(sequence)):
             windowEnd = len(sequence)
+        # while the moving window doesn't hit the end
         while (windowEnd <= len(sequence)):
+            # get the current base pairs in the window
             slice = sequence[windowStart:windowEnd]
+            # check for every enzyme starting at every character in slice
             for i in range(len(slice)):
                 lengthLeft = self.windowLength - i
+                # iterate through every enzyme
                 for key in self.enzymes:
-                    # if the enzyme won't fit, we move on to the next
-                    if len(self.enzymeFile[key][1]) > lengthLeft:
+                    currentEnzyme = self.enzymes[key]
+                    # if we have already found this enzyme starting on this
+                    # character in the sequence then we don't need to find it
+                    # again
+                    if currentEnzyme[3] == i + windowStart:
                         continue
+                    enzymeLength = len(currentEnzyme[1])
+                    # if the enzyme won't fit, we move on to the next
+                    if enzymeLength > lengthLeft:
+                        continue
+                    if self.__compareSequences(slice[i:i+enzymeLength]):
+                        # if we haven't found one yet or if the current sequence
+                        # is closer to the original, then we replace it
+                        if currentEnzyme[2] == "" or \
+                            self.__calculateSequenceDifferences( \
+                            currentEnzyme[2]) > sequenceDiff:
+                            currentEnzyme[2] = sequence
+                            currentEnzyme[3] = i + windowStart
             windowStart += 1
             windowEnd += 1
 
