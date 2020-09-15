@@ -36,7 +36,8 @@ class EnzymeChooser:
         # output dict with enzymes as the keys, then the value is
         # a list: [binding sequence, shortened binding sequence, least-
         # different input sequence window permutation (defaults to empty string),
-        # enzyme starting index, overall best sequence with length of the input]
+        # enzyme starting index, overall best sequence with length of the input,
+        # isReversed]
         # shortened means the leading and trailing
         # N's have been stripped from the sequence.
         # if the starting index is -1, then the enzyme hasn't been found
@@ -52,7 +53,7 @@ class EnzymeChooser:
             splitLine = line.split()
             # key: enzyme, value: sequence
             self.enzymes[splitLine[0]] = [splitLine[1], \
-                splitLine[1].strip("N"), "", -1, ""]
+                splitLine[1].strip("N"), "", -1, "", 0]
 
     # make the list of all codons that could be interchanged
     # at each codon place while keeping the overall codons the same
@@ -85,8 +86,8 @@ class EnzymeChooser:
     # to the original sequence
     def __calculateSequenceDifferences(self, sequence):
         differences = 0
-        for i in range(len(sequence)):
-            if sequence[i] != self.inputSeq:
+        for i in range(self.windowLength):
+            if sequence[i] != self.inputSeq[i + self.windowStart]:
                 differences += 1
         return differences
 
@@ -97,16 +98,15 @@ class EnzymeChooser:
     def __searchForEnzymes(self, sequence):
         sequenceDiff = self.__calculateSequenceDifferences(sequence)
         # check for every enzyme starting at every character in slice
+        seqObj = Seq(sequence)
+        reverse = str(seqObj.reverse_complement())
+        #print(sequence)
+        #print(reverse)
         for i in range(len(sequence)):
             lengthLeft = self.windowLength - i
             # iterate through every enzyme
             for key in self.enzymes:
                 currentEnzyme = self.enzymes[key]
-                # if we have already found this enzyme starting on this
-                # character in the sequence then we don't need to find it
-                # again
-                if currentEnzyme[3] == i + self.windowStart:
-                    continue
                 enzymeLength = len(currentEnzyme[1])
                 # if the enzyme won't fit, we move on to the next
                 if enzymeLength > lengthLeft:
@@ -122,7 +122,19 @@ class EnzymeChooser:
                         currentEnzyme[3] = i + self.windowStart
                         currentEnzyme[4] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
-
+                        currentEnzyme[5] = 0
+                if self.__compareSequences(reverse[i:i+enzymeLength], currentEnzyme[1]):
+                    # if we haven't found one yet or if the current sequence
+                    # is closer to the original, then we replace it
+                    if currentEnzyme[2] == "" or \
+                        self.__calculateSequenceDifferences( \
+                        currentEnzyme[2]) > sequenceDiff:
+                        # we found one, but it's on the other side!
+                        currentEnzyme[2] = sequence
+                        currentEnzyme[3] = self.windowEnd - i - 1
+                        currentEnzyme[4] = self.inputSeq[0:self.windowStart] + \
+                            sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
+                        currentEnzyme[5] = 1
 
     # recursive function that goes through possible permutations
     # of each scrolling window
@@ -136,6 +148,7 @@ class EnzymeChooser:
                 newSequence += self.permutationsList[i][previousIndicies[i]]
             #print("Current sequence:" + newSequence)
             #print("Current codons: " + Seq.translate(Seq(newSequence, generic_dna)))
+
             self.__searchForEnzymes(newSequence)
         # Keep going with different options for currentIndex
         else:
