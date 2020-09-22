@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CRISPRcruncher</title>
+</head>
+<body>
+   <h1>Welcome to CRISPRcruncher!</h1>
+   <form method="post">
+    <div class="form-group">
+        <textarea name="sequence" placeholder="Enter Input Sequence"
+                  class="form-control">{{ request.form['sequence'] }}</textarea>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Get Enzymes</button>
+    </div>
+    {% if hasResults %}
+    <h3>{{enzymes|length}} enzymes found!</h3>
+    <table style="width: 100%">
+      <tr>
+        <th>Enzyme</th>
+        <th>Enzyme Sequence</th>
+        <th>Modified Input Sequence</th>
+        <th>Location</th>
+        <th>Reverse</th>
+      </tr>
+    {% for enzyme in enzymes %}
+      <tr>
+        <td>{{enzyme}}</td>
+        <td>{{enzymes[enzyme][1]}}</td>
+        <td>{{enzymes[enzyme][4]}}</td>
+        <td>{{enzymes[enzyme][3]}}</td>
+        <td>{{enzymes[enzyme][5]}}</td>
+      </tr>
+    {% endfor %}
+  </table>
+    {% endif %}
+</form>
+</body>
+</html>

@@ -3,7 +3,7 @@ import sys
 import Bio
 from Bio.Data import CodonTable
 from Bio.Seq import Seq
-from Bio.Alphabet import generic_dna
+from flask import Flask, render_template, request, url_for, flash, redirect
 
 # Class that looks through all of the permutations of the input
 # sequence that keeps the overall codon output the same. It then
@@ -60,7 +60,7 @@ class EnzymeChooser:
     def __makePermuationsList(self, slice):
         # clear list
         self.permutationsList = []
-        codons = Seq.translate(Seq(slice, generic_dna))
+        codons = Seq.translate(Seq(slice))
         #print(codons)
         for c in codons:
             self.permutationsList.append( \
@@ -90,7 +90,6 @@ class EnzymeChooser:
             if sequence[i] != self.inputSeq[i + self.windowStart]:
                 differences += 1
         return differences
-
 
     # searching for enzymes using a scrolling window of windowLength
     # returns a list of enzymes and the location that they start at
@@ -172,19 +171,40 @@ class EnzymeChooser:
             self.__permutate([], 0)
             self.windowStart += 3
             self.windowEnd += 3
+        tempDict = self.enzymes
+        self.enzymes = {}
+        for key in tempDict:
+            if tempDict[key][3] != -1:
+                self.enzymes[key] = tempDict[key]
         return self.enzymes
 
 
 
-input = "GATCGATGGGCCTATATAGGATCGAAAATC"
+    # input = "GATCGATGGGCCTATATAGGATCGAAAATC"
 enzymesFile = "enzymes.txt"
 windowLength = 15
-chooser = EnzymeChooser(input, enzymesFile, windowLength)
-enzymes = chooser.getEnzymes()
-found = 0
-for key in enzymes:
-    if enzymes[key][3] != -1 and len(enzymes[key][1]) >= 6:
-        found += 1
-        print(key)
-        print(enzymes[key])
-print("Found " + str(found) + " enzymes.")
+# chooser = EnzymeChooser(input, enzymesFile, windowLength)
+# enzymes = chooser.getEnzymes()
+# found = 0
+# for key in enzymes:
+#     if enzymes[key][3] != -1 and len(enzymes[key][1]) >= 6:
+#         found += 1
+#         print(key)
+#         print(enzymes[key])
+# print("Found " + str(found) + " enzymes.")
+
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'POGGERS'
+
+@app.route("/", methods=("GET", "POST"))
+def crisprcruncher():
+    if request.method == 'POST':
+        sequence = request.form['sequence']
+        if not sequence:
+            flash('Title is required!')
+        else:
+            chooser = EnzymeChooser(sequence, enzymesFile, 15)
+            enzymes = chooser.getEnzymes()
+            return render_template('index 2.html', hasResults = True,
+                enzymes = enzymes)
+    return render_template('index 2.html', hasResuls = False)
