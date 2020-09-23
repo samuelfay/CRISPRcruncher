@@ -205,6 +205,6 @@ def crisprcruncher():
         else:
             chooser = EnzymeChooser(sequence, enzymesFile, 15)
             enzymes = chooser.getEnzymes()
-            return render_template('index 2.html', hasResults = True,
+            return render_template('index.html', hasResults = True,
                 enzymes = enzymes)
-    return render_template('index 2.html', hasResuls = False)
+    return render_template('index.html', hasResuls = False)

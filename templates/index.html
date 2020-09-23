@@ -1,40 +1,118 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>CRISPRcruncher</title>
-</head>
-<body>
-   <h1>Welcome to CRISPRcruncher!</h1>
-   <form method="post">
-    <div class="form-group">
-        <textarea name="sequence" placeholder="Enter Input Sequence"
-                  class="form-control">{{ request.form['sequence'] }}</textarea>
-    </div>
-    <div class="form-group">
-        <button type="submit" class="btn btn-primary">Get Enzymes</button>
-    </div>
-    {% if hasResults %}
-    <h3>{{enzymes|length}} enzymes found!</h3>
-    <table style="width: 100%">
-      <tr>
-        <th>Enzyme</th>
-        <th>Enzyme Sequence</th>
-        <th>Modified Input Sequence</th>
-        <th>Location</th>
-        <th>Reverse</th>
-      </tr>
-    {% for enzyme in enzymes %}
-      <tr>
-        <td>{{enzyme}}</td>
-        <td>{{enzymes[enzyme][1]}}</td>
-        <td>{{enzymes[enzyme][4]}}</td>
-        <td>{{enzymes[enzyme][3]}}</td>
-        <td>{{enzymes[enzyme][5]}}</td>
-      </tr>
-    {% endfor %}
-  </table>
-    {% endif %}
-</form>
-</body>
+<!DOCTYPE HTML>
+<!--
+	Ex Machina by TEMPLATED
+    templated.co @templatedco
+    Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+
+	Modified for CRISPRcruncher by Samuel Fay
+-->
+<html>
+	<head>
+		<title>CRISPRcruncher</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700italic,400,300,700' rel='stylesheet' type='text/css'>
+		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-panels.min.js"></script>
+		<script src="js/init.js"></script>
+			<link rel="stylesheet" type="text/css" href="/static/css/skel-noscript.css" />
+			<link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+			<link rel="stylesheet" type="text/css" href="/static/css/style-desktop.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
+	</head>
+	<body class="homepage">
+
+	<!-- Header -->
+		<div id="header" style="position:absolute;height:15%;width:100%;top:0%">
+			<div class="container">
+
+				<!-- Logo -->
+					<div id="logo">
+						<h1><a href="#">CRISPRcruncher</a></h1>
+					</div>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul>
+							<li class="active"><a href="index.html">Homepage</a></li>
+						</ul>
+					</nav>
+
+			</div>
+		</div>
+	<!-- Header -->
+
+	<!-- Banner -->
+
+	<!-- /Banner -->
+
+	<!-- Main -->
+		<div id="page" style="padding:4em 0em 4em 0em;position:absolute;min-height:75%
+		;width:100%;top:15%">
+			{% if hasResults != true %}
+			<div id="main-form" class="container">
+			 <div style="padding:0% 25% 0% 25%;display:flex;justify-content:center">
+			 <form method="post">
+			 <div class="form-group">
+				 <ul class="style1" pad>
+				 <input type="text" name="name" placeholder="Your Name"
+									 class="form-control mainFormInput" >{{ request.form['name'] }}</input>
+				 <input type="text" name="affiliation" placeholder="Affiliation"
+										class="form-control mainFormInput">{{ request.form['affiliation'] }}</input>
+				</ul>
+				<ul class="style1">
+				<input type="text" name="email" placeholder="Email (optional)"
+									class="form-control mainFormInput">{{ request.form['email'] }}</input>
+				<input type="text" name="organism" placeholder="Organism"
+									class="form-control mainFormInput">{{ request.form['organism'] }}</input>
+				</ul>
+					 <input name="sequence" placeholder="Enter Input Sequence"
+										 class="form-control mainFormInput" style="width:99%">{{ request.form['sequence'] }}</textarea>
+				</div>
+				<div id="submitButtonDiv" style="display:flex;justify-content:center">
+				 <button type="submit" class="button" style="font-size:1.3em;">Get Enzymes</button>
+			 </div>
+		 </form>
+		 	</div>
+		</div>
+			{% endif %}
+			 {% if hasResults %}
+			 <button type="button" class="button" style="font-size:0.5em;" onclick="window.location.href='/index.html';"
+			 >Get Enzymes</button>
+			 <h3>{{enzymes|length}} enzymes found!</h3>
+			 <table style="width: 100%">
+				 <tr>
+					 <th>Enzyme</th>
+					 <th>Enzyme Sequence</th>
+					 <th>Modified Input Sequence</th>
+					 <th>Location</th>
+					 <th>Reverse</th>
+				 </tr>
+			 {% for enzyme in enzymes %}
+				 <tr>
+					 <td>{{enzyme}}</td>
+					 <td>{{enzymes[enzyme][1]}}</td>
+					 <td>{{enzymes[enzyme][4]}}</td>
+					 <td>{{enzymes[enzyme][3]}}</td>
+					 <td>{{enzymes[enzyme][5]}}</td>
+				 </tr>
+			 {% endfor %}
+			</table>
+			 {% endif %}
+	</div>
+	<!-- /Footer -->
+
+	<!-- Copyright -->
+		<div id="footer" style="position:absolute;bottom:0;left:0;width:100%;height:10%">
+		<div id="copyright" class="container">
+			Design: <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>)
+		</div>
+	</div>
+
+
+	</body>
 </html>
