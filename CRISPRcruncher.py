@@ -208,3 +208,6 @@ def crisprcruncher():
             return render_template('index.html', hasResults = True,
                 enzymes = enzymes)
     return render_template('index.html', hasResuls = False)
+
+if __name__ == "__main__":
+    app.run(debug=True)
