@@ -4,6 +4,7 @@ import Bio
 from Bio.Data import CodonTable
 from Bio.Seq import Seq
 from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Markup
 
 # Class that looks through all of the permutations of the input
 # sequence that keeps the overall codon output the same. It then
@@ -25,12 +26,13 @@ class EnzymeChooser:
         "M": ["A", "C"],
         "K": ["G", "T"],
     }
-    def __init__(self, inputSeq, enzymeFile, windowLength):
+    def __init__(self, inputSeq, enzymeFile, windowLength, minEnzymeLength):
         # dictionary of codons to amino acids
         self.fwdTable = CodonTable.standard_dna_table.forward_table
         self.inputSeq = inputSeq
         self.enzymeFile = enzymeFile
         self.windowLength = windowLength
+        self.minEnzymeLength = minEnzymeLength
         # list for current permutations
         self.permutationsList = []
         # output dict with enzymes as the keys, then the value is
@@ -173,12 +175,23 @@ class EnzymeChooser:
             self.windowEnd += 3
         tempDict = self.enzymes
         self.enzymes = {}
+        # remove enzymes that weren't found, and enzymes below the min length
         for key in tempDict:
-            if tempDict[key][3] != -1:
+            if tempDict[key][3] != -1 and len(tempDict[key][1]) >= self.minEnzymeLength:
                 self.enzymes[key] = tempDict[key]
+        # insert underline and bolded (html format) for the enzyme site
+        for key in self.enzymes:
+            e = self.enzymes[key]
+            e[4] = Markup(e[4][0:e[3]] + "<b><u>" + e[4][e[3]:e[3]+len(e[1])]
+                + "</u></b>" + e[4][e[3]+len(e[1]):])
         return self.enzymes
 
-
+# function to write the user data to a text files
+def writeUserData(name, affiliation, email, organism):
+    out = open("usersInfo.txt", "a")
+    out.write("\n" + name + "\t" + affiliation + "\t" + email)
+    out.write("\t" + organism)
+    out.close()
 
     # input = "GATCGATGGGCCTATATAGGATCGAAAATC"
 enzymesFile = "enzymes.txt"
@@ -198,16 +211,44 @@ app.config['SECRET_KEY'] = 'POGGERS'
 
 @app.route("/", methods=("GET", "POST"))
 def crisprcruncher():
+    # if they submitted the form
     if request.method == 'POST':
-        sequence = request.form['sequence']
-        if not sequence:
-            flash('Title is required!')
+        name = request.form['name']
+        affiliation = request.form['affiliation']
+        email = request.form['email']
+        organism = request.form['organism']
+        sequence = request.form['sequence'].upper()
+        minLength = request.form['minLength']
+
+        errorMessage = ""
+        # input validation
+        if (len(name) == 0 or len(affiliation) == 0 or len(organism) == 0
+                or len(sequence) == 0):
+            errorMessage += "Name, Affiliation, Organism, and Sequence are " \
+                "required.\n"
+        if len(sequence) > 100:
+            errorMessage += "The sequence must be less than 100 base pairs.\n"
+        for char in sequence:
+            if char != "A" and char != "T" and char != "C" and char != "G":
+                errorMessage += "The sequence must only contain the base " \
+                    "pairs A, T, C, and G.\n"
+                break
+        try:
+            int(minLength)
+        except ValueError:
+            errorMessage += "Minimum Length must be an integer.\n"
+        if len(errorMessage) > 0:
+            errorMessage = errorMessage.rstrip("\n")
+            return render_template("index.html", hasResults=False,
+                hasErrors=True, errorMessage=errorMessage)
+
         else:
-            chooser = EnzymeChooser(sequence, enzymesFile, 15)
+            writeUserData(name, affiliation, email, organism)
+            chooser = EnzymeChooser(sequence, enzymesFile, 15, int(minLength))
             enzymes = chooser.getEnzymes()
-            return render_template('index.html', hasResults = True,
-                enzymes = enzymes)
-    return render_template('index.html', hasResuls = False)
+            return render_template("index.html", hasResults=True,
+                enzymes=enzymes)
+    return render_template("index.html", hasResults=False, hasErrors=False)
 
 if __name__ == "__main__":
     app.run(debug=True)

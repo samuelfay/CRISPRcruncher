@@ -33,13 +33,13 @@
 
 				<!-- Logo -->
 					<div id="logo">
-						<h1><a href="#">CRISPRcruncher</a></h1>
+						<h1><a href="/">CRISPRcruncher</a></h1>
 					</div>
 
 				<!-- Nav -->
 					<nav id="nav">
 						<ul>
-							<li class="active"><a href="index.html">Homepage</a></li>
+							<li class="active"><a href="/">Homepage</a></li>
 						</ul>
 					</nav>
 
@@ -55,23 +55,30 @@
 		<div id="page" style="padding-top: 0.5em 0em 0.5em 0em">
 			{% if hasResults != true %}
 			<div id="main-form" class="container">
-			 <div style="padding:0% 25% 0% 25%;display:flex;justify-content:center">
+			 <div style="padding:0% 25% 0% 25%;display:flex;justify-content:center;
+			 margin-top:5em">
 			 <form method="post">
 			 <div class="form-group">
 				 <ul class="style1" pad>
 				 <input type="text" name="name" placeholder="Your Name"
-									 class="form-control mainFormInput" >{{ request.form['name'] }}</input>
+									 class="form-control mainFormInput" >
 				 <input type="text" name="affiliation" placeholder="Affiliation"
-										class="form-control mainFormInput">{{ request.form['affiliation'] }}</input>
+										class="form-control mainFormInput">
 				</ul>
 				<ul class="style1">
 				<input type="text" name="email" placeholder="Email (optional)"
-									class="form-control mainFormInput">{{ request.form['email'] }}</input>
+									class="form-control mainFormInput">
 				<input type="text" name="organism" placeholder="Organism"
-									class="form-control mainFormInput">{{ request.form['organism'] }}</input>
+									class="form-control mainFormInput">
 				</ul>
 					 <input name="sequence" placeholder="Enter Input Sequence"
-										 class="form-control mainFormInput" style="width:99%">{{ request.form['sequence'] }}</textarea>
+										 class="form-control mainFormInput" style="width:99%">
+					 <input name="minLength" placeholder="Minimum Recgonition Length (optional)"
+										 class="form-control mainFormInput" style="width:99%"">
+
+					<p style="color:red">{{errorMessage}}</p>
+					{% if hasErrors %}
+					{% endif %}
 				</div>
 				<div id="submitButtonDiv" style="display:flex;justify-content:center">
 				 <button type="submit" class="button" style="font-size:1.3em;">Get Enzymes</button>
@@ -92,16 +99,18 @@
 					 <th>Enzyme</th>
 					 <th>Enzyme Sequence</th>
 					 <th>Modified Input Sequence</th>
-					 <th>Location</th>
-					 <th>Reverse</th>
+					 <th>Top/Bottom Strand</th>
 				 </tr>
 			 {% for enzyme in enzymes %}
 				 <tr>
 					 <td>{{enzyme}}</td>
 					 <td>{{enzymes[enzyme][1]}}</td>
 					 <td>{{enzymes[enzyme][4]}}</td>
-					 <td>{{enzymes[enzyme][3]}}</td>
-					 <td>{{enzymes[enzyme][5]}}</td>
+					 {% if enzymes[enzyme][5] %}
+					 <td>Bottom</td>
+					 {% else %}
+					 <td>Top</td>
+					 {% endif %}
 				 </tr>
 			 {% endfor %}
 			</table>
