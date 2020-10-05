@@ -14,7 +14,23 @@
 		<meta name="keywords" content="" />
 		<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700italic,400,300,700' rel='stylesheet' type='text/css'>
 		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>-->
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<!-- Progress bar from Daniel Morrison
+	<script>
+
+	var source = new EventSource("/");
+	source.onmessage = function(event) {
+		$('.progress-bar').css('width', event.data+'%').attr('aria-valuenow', event.data);
+		$('.progress-bar-label').text(event.data+'%');
+
+		if(event.data == 100){
+			source.close()
+		}
+	}
+</script>-->
 		<script src="js/skel.min.js"></script>
 		<script src="js/skel-panels.min.js"></script>
 		<script src="js/init.js"></script>
@@ -74,8 +90,7 @@
 					 <input name="sequence" placeholder="Enter Input Sequence"
 										 class="form-control mainFormInput" style="width:99%">
 					 <input name="minLength" placeholder="Minimum Recgonition Length (optional)"
-										 class="form-control mainFormInput" style="width:99%"">
-
+										 class="form-control mainFormInput" style	="width:99%">
 					<p style="color:red">{{errorMessage}}</p>
 					{% if hasErrors %}
 					{% endif %}
@@ -83,6 +98,17 @@
 				<div id="submitButtonDiv" style="display:flex;justify-content:center">
 				 <button type="submit" class="button" style="font-size:1.3em;">Get Enzymes</button>
 			 </div>
+			 {% if working %}
+			 	{% with messages = get_flashed_messages() %}
+  				{% if messages %}
+    				<ul>
+    					{% for message in messages %}
+      				<li>{{ message }}</li>
+    					{% endfor %}
+    				</ul>
+  				{% endif %}
+				{% endwith %}
+			{% endif %}
 		 </form>
 		 	</div>
 		</div>

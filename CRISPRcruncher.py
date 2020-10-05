@@ -4,7 +4,7 @@ import Bio
 from Bio.Data import CodonTable
 from Bio.Seq import Seq
 from flask import Flask, render_template, request, url_for, flash, redirect
-from flask import Markup
+from flask import Markup, Response
 
 # Class that looks through all of the permutations of the input
 # sequence that keeps the overall codon output the same. It then
@@ -32,6 +32,7 @@ class EnzymeChooser:
         self.inputSeq = inputSeq
         self.enzymeFile = enzymeFile
         self.windowLength = windowLength
+        self.numWindows = (len(self.inputSeq) - self.windowLength) / 3
         self.minEnzymeLength = minEnzymeLength
         # list for current permutations
         self.permutationsList = []
@@ -158,14 +159,15 @@ class EnzymeChooser:
 
     # only public function, runs all the other functions to
     # get the final product
-    def getEnzymes(self):
+    def getEnzymes(self, outDict):
         self.__makeEnzymesDict()
         self.windowStart = 0
         self.windowEnd = self.windowLength
+        currentWindow = 0
         # while the moving window doesn't hit the end
         while (self.windowEnd <= len(self.inputSeq)):
-            print("SEARCHING WINDOW FROM " + str(self.windowStart) + " TO " \
-                + str(self.windowEnd))
+            flash(str(currentWindow) + "/" + str(self.numWindows))
+            currentWindow += 1
             # get the current base pairs in the window
             slice = self.inputSeq[self.windowStart:self.windowEnd]
             #print(slice)
@@ -174,6 +176,7 @@ class EnzymeChooser:
             self.windowStart += 3
             self.windowEnd += 3
         tempDict = self.enzymes
+        #print(tempDict)
         self.enzymes = {}
         # remove enzymes that weren't found, and enzymes below the min length
         for key in tempDict:
@@ -184,7 +187,8 @@ class EnzymeChooser:
             e = self.enzymes[key]
             e[4] = Markup(e[4][0:e[3]] + "<b><u>" + e[4][e[3]:e[3]+len(e[1])]
                 + "</u></b>" + e[4][e[3]+len(e[1]):])
-        return self.enzymes
+        for key in self.enzymes:
+            outDict[key] = self.enzymes[key]
 
 # function to write the user data to a text files
 def writeUserData(name, affiliation, email, organism):
@@ -228,6 +232,9 @@ def crisprcruncher():
                 "required.\n"
         if len(sequence) > 100:
             errorMessage += "The sequence must be less than 100 base pairs.\n"
+        if len(sequence) % 3 != 0:
+            errorMessage += "Please make sure sequence is in frame and has a length" \
+            " that is a multiple of 3.\n"
         for char in sequence:
             if char != "A" and char != "T" and char != "C" and char != "G":
                 errorMessage += "The sequence must only contain the base " \
@@ -244,8 +251,12 @@ def crisprcruncher():
 
         else:
             writeUserData(name, affiliation, email, organism)
+            return render_template("index.html", working=True)
+            enzymes = {}
             chooser = EnzymeChooser(sequence, enzymesFile, 15, int(minLength))
-            enzymes = chooser.getEnzymes()
+            #return Response(chooser.getEnzymes(), mimetype= 'text/event-stream')
+            chooser.getEnzymes(enzymes)
+            #print(enzymes)
             return render_template("index.html", hasResults=True,
                 enzymes=enzymes)
     return render_template("index.html", hasResults=False, hasErrors=False)
