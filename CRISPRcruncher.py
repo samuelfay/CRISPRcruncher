@@ -197,6 +197,12 @@ def writeUserData(name, affiliation, email, organism):
     out.write("\t" + organism)
     out.close()
 
+# function to write the user feedback to a text file
+def writeFeedback(feedback):
+    out = open("feedback.txt", "a")
+    out.write(feedback + "\n\n\n")
+    out.close()
+
     # input = "GATCGATGGGCCTATATAGGATCGAAAATC"
 enzymesFile = "enzymes.txt"
 windowLength = 15
@@ -214,7 +220,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'POGGERS'
 
 @app.route("/", methods=("GET", "POST"))
-def crisprcruncher():
+def index():
     # if they submitted the form
     if request.method == 'POST':
         name = request.form['name']
@@ -223,7 +229,6 @@ def crisprcruncher():
         organism = request.form['organism']
         sequence = request.form['sequence'].upper()
         minLength = request.form['minLength']
-
         errorMessage = ""
         # input validation
         if (len(name) == 0 or len(affiliation) == 0 or len(organism) == 0
@@ -248,18 +253,37 @@ def crisprcruncher():
             errorMessage = errorMessage.rstrip("\n")
             return render_template("index.html", hasResults=False,
                 hasErrors=True, errorMessage=errorMessage)
-
         else:
             writeUserData(name, affiliation, email, organism)
-            return render_template("index.html", working=True)
             enzymes = {}
             chooser = EnzymeChooser(sequence, enzymesFile, 15, int(minLength))
             #return Response(chooser.getEnzymes(), mimetype= 'text/event-stream')
+            flash("this could take a few minutes")
             chooser.getEnzymes(enzymes)
-            #print(enzymes)
+            print(enzymes)
             return render_template("index.html", hasResults=True,
                 enzymes=enzymes)
     return render_template("index.html", hasResults=False, hasErrors=False)
+
+@app.route("/feedback", methods=("GET", "POST"))
+def feedback():
+    # if they submitted the form
+    if request.method == 'POST':
+        feedback = request.form['feedback']
+        errorMessage = ""
+        # input validation
+        if len(feedback.split()) > 200:
+            errorMessage += "Please keep the feedback to 200 words.\n"
+        if len(feedback) < 1:
+            errorMessage += "Feedback too short.\n"
+        if len(errorMessage) > 0:
+            errorMessage = errorMessage.rstrip("\n")
+            return render_template("feedback.html",
+                hasErrors=True, errorMessage=errorMessage)
+        else:
+            writeFeedback(feedback)
+            return render_template("feedback.html", submitted=True)
+    return render_template("feedback.html", hasErrors=False)
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -3,7 +3,6 @@
 	Ex Machina by TEMPLATED
     templated.co @templatedco
     Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
-
 	Modified for CRISPRcruncher by Samuel Fay
 -->
 <html style="height:100%;">
@@ -14,26 +13,20 @@
 		<meta name="keywords" content="" />
 		<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700italic,400,300,700' rel='stylesheet' type='text/css'>
 		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
-		<!--<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>-->
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-	<!-- Progress bar from Daniel Morrison
-	<script>
-
-	var source = new EventSource("/");
-	source.onmessage = function(event) {
-		$('.progress-bar').css('width', event.data+'%').attr('aria-valuenow', event.data);
-		$('.progress-bar-label').text(event.data+'%');
-
-		if(event.data == 100){
-			source.close()
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<script>
+		window.onload = function() {
+			document.getElementById("loadingDiv").style.display = "none";
 		}
-	}
-</script>-->
-		<script src="js/skel.min.js"></script>
-		<script src="js/skel-panels.min.js"></script>
-		<script src="js/init.js"></script>
+		function showLoading() {
+			document.getElementById("main-form").style.display = "none";
+			document.getElementById("loadingDiv").style.display = "flex";
+			return true;
+		}
+		</script>
+		<!--<script src="static/js/skel.min.js"></script>
+		<script src="static/js/skel-panels.min.js"></script>
+		<script src="static/js/init.js"></script>-->
 			<link rel="stylesheet" type="text/css" href="/static/css/skel-noscript.css" />
 			<link rel="stylesheet" type="text/css" href="/static/css/style.css" />
 			<link rel="stylesheet" type="text/css" href="/static/css/style-desktop.css" />
@@ -56,6 +49,7 @@
 					<nav id="nav">
 						<ul>
 							<li class="active"><a href="/">Homepage</a></li>
+							<li class="inactive"><a href="/feedback">Feedback</a></li>
 						</ul>
 					</nav>
 
@@ -89,28 +83,25 @@
 				</ul>
 					 <input name="sequence" placeholder="Enter Input Sequence"
 										 class="form-control mainFormInput" style="width:99%">
-					 <input name="minLength" placeholder="Minimum Recgonition Length (optional)"
-										 class="form-control mainFormInput" style	="width:99%">
-					<p style="color:red">{{errorMessage}}</p>
+					 <input name="minLength" placeholder="Minimum Recognition Length (optional)"
+										 class="form-control mainFormInput" style="width:99%">
 					{% if hasErrors %}
+					<p style="color:red">{{errorMessage}}</p>
 					{% endif %}
 				</div>
 				<div id="submitButtonDiv" style="display:flex;justify-content:center">
-				 <button type="submit" class="button" style="font-size:1.3em;">Get Enzymes</button>
+				 <button id="formSubmitButton" type="submit" class="button" style="font-size:1.3em;"
+				 onclick="return showLoading();">Get Enzymes</button>
 			 </div>
-			 {% if working %}
-			 	{% with messages = get_flashed_messages() %}
-  				{% if messages %}
-    				<ul>
-    					{% for message in messages %}
-      				<li>{{ message }}</li>
-    					{% endfor %}
-    				</ul>
-  				{% endif %}
-				{% endwith %}
-			{% endif %}
 		 </form>
 		 	</div>
+		</div>
+		<div id="loadingDiv" style="justify-content:center;flex-direction:column;align-items:center;
+		padding-top:6%">
+			<div class="loadingio-spinner-disk-qrhes6hy5bg"><div class="ldio-ye9xf5zbmp">
+<div><div></div><div></div></div>
+</div></div>
+			<p><b style="font-size: 1.5em">This could take a minute.</b></p>
 		</div>
 			{% endif %}
 			 {% if hasResults %}
