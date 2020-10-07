@@ -56,7 +56,7 @@ class EnzymeChooser:
             splitLine = line.split()
             # key: enzyme, value: sequence
             self.enzymes[splitLine[0]] = [splitLine[1], \
-                splitLine[1].strip("N"), "", -1, "", 0]
+                splitLine[1].strip("N"), "", -1, "", False]
 
     # make the list of all codons that could be interchanged
     # at each codon place while keeping the overall codons the same
@@ -110,8 +110,11 @@ class EnzymeChooser:
             for key in self.enzymes:
                 currentEnzyme = self.enzymes[key]
                 enzymeLength = len(currentEnzyme[1])
-                # if the enzyme won't fit, we move on to the next
-                if enzymeLength > lengthLeft:
+                # get the length without the N'
+                trueLength = self.__enzymeLength(currentEnzyme[1])
+                # if the enzyme won't fit, or, its shorter than the min length
+                # we move on to the next
+                if enzymeLength > lengthLeft or trueLength < self.minEnzymeLength:
                     continue
                 if self.__compareSequences(sequence[i:i+enzymeLength], currentEnzyme[1]):
                     # if we haven't found one yet or if the current sequence
@@ -124,7 +127,7 @@ class EnzymeChooser:
                         currentEnzyme[3] = i + self.windowStart
                         currentEnzyme[4] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
-                        currentEnzyme[5] = 0
+                        currentEnzyme[5] = False
                 if self.__compareSequences(reverse[i:i+enzymeLength], currentEnzyme[1]):
                     # if we haven't found one yet or if the current sequence
                     # is closer to the original, then we replace it
@@ -136,7 +139,7 @@ class EnzymeChooser:
                         currentEnzyme[3] = self.windowEnd - i - 1
                         currentEnzyme[4] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
-                        currentEnzyme[5] = 1
+                        currentEnzyme[5] = True
 
     # recursive function that goes through possible permutations
     # of each scrolling window
@@ -157,9 +160,44 @@ class EnzymeChooser:
             for i in range(len(self.permutationsList[currentIndex])):
                 self.__permutate(previousIndicies + [i], currentIndex + 1)
 
+    # helper function for getting startIndex
+    # used for list sorting in the public funciton
+    def __getStartIndex(self, enzyme):
+        if enzyme[5]:
+            return enzyme[3] - len(enzyme[1])
+        else:
+            return enzyme[3]
+
+    # marks up the sequence for output in the table.
+    # colors the changed sequence and makes the enzyme site bolded
+    # returns a new version of the input sequence with html in it of the Markup class.
+    def __markup(self, sequence, startIndex, enzymeLength, isReversed):
+        out = ""
+        # modify the start index if it's reversed
+        if isReversed:
+            startIndex = startIndex - enzymeLength + 1
+        for i in range(len(self.inputSeq)):
+            # if this is the start of the enzyme sites
+            if i == startIndex:
+                out += "<b>"
+            # if we are past the enzyme site
+            elif i == startIndex + enzymeLength:
+                out += "</b>"
+            # if this nucleotide was changed
+            if self.inputSeq[i] != sequence[i]:
+                out += "<span style=\"color:#e93c73\">" + sequence[i] + "</span>"
+            # otherwise just add the nucleotide
+            else:
+                out += sequence[i]
+        return Markup(out)
+
+    # get true length of enzyme (without "N"'s')
+    def __enzymeLength(self, enzyme):
+        return len(enzyme) - enzyme.count("N")
+
     # only public function, runs all the other functions to
     # get the final product
-    def getEnzymes(self, outDict):
+    def getEnzymes(self, outList):
         self.__makeEnzymesDict()
         self.windowStart = 0
         self.windowEnd = self.windowLength
@@ -180,15 +218,16 @@ class EnzymeChooser:
         self.enzymes = {}
         # remove enzymes that weren't found, and enzymes below the min length
         for key in tempDict:
-            if tempDict[key][3] != -1 and len(tempDict[key][1]) >= self.minEnzymeLength:
+            if (tempDict[key][3] != -1 and
+            self.__enzymeLength(tempDict[key][1]) >= self.minEnzymeLength):
                 self.enzymes[key] = tempDict[key]
         # insert underline and bolded (html format) for the enzyme site
         for key in self.enzymes:
             e = self.enzymes[key]
-            e[4] = Markup(e[4][0:e[3]] + "<b><u>" + e[4][e[3]:e[3]+len(e[1])]
-                + "</u></b>" + e[4][e[3]+len(e[1]):])
+            e[4] = self.__markup(e[4], e[3], len(e[1]), e[5])
         for key in self.enzymes:
-            outDict[key] = self.enzymes[key]
+            outList.append(self.enzymes[key] + [key])
+        outList.sort(key = lambda x:self.__getStartIndex(x))
 
 # function to write the user data to a text files
 def writeUserData(name, affiliation, email, organism):
@@ -255,7 +294,7 @@ def index():
                 hasErrors=True, errorMessage=errorMessage)
         else:
             writeUserData(name, affiliation, email, organism)
-            enzymes = {}
+            enzymes = []
             chooser = EnzymeChooser(sequence, enzymesFile, 15, int(minLength))
             #return Response(chooser.getEnzymes(), mimetype= 'text/event-stream')
             flash("this could take a few minutes")

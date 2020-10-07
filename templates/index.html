@@ -83,7 +83,7 @@
 				</ul>
 					 <input name="sequence" placeholder="Enter Input Sequence"
 										 class="form-control mainFormInput" style="width:99%">
-					 <input name="minLength" placeholder="Minimum Recognition Length (optional)"
+					 <input name="minLength" placeholder="Minimum Recognition Length"
 										 class="form-control mainFormInput" style="width:99%">
 					{% if hasErrors %}
 					<p style="color:red">{{errorMessage}}</p>
@@ -120,10 +120,10 @@
 				 </tr>
 			 {% for enzyme in enzymes %}
 				 <tr>
-					 <td>{{enzyme}}</td>
-					 <td>{{enzymes[enzyme][1]}}</td>
-					 <td>{{enzymes[enzyme][4]}}</td>
-					 {% if enzymes[enzyme][5] %}
+					 <td>{{enzyme[6]}}</td>
+					 <td>{{enzyme[1]}}</td>
+					 <td>{{enzyme[4]}}</td>
+					 {% if enzyme[5] %}
 					 <td>Bottom</td>
 					 {% else %}
 					 <td>Top</td>
