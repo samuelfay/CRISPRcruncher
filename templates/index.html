@@ -116,14 +116,16 @@
 					 <th>Enzyme</th>
 					 <th>Enzyme Sequence</th>
 					 <th>Modified Input Sequence</th>
-					 <th>Top/Bottom Strand</th>
+					 <th>Strand</th>
 				 </tr>
 			 {% for enzyme in enzymes %}
 				 <tr>
 					 <td>{{enzyme[6]}}</td>
 					 <td>{{enzyme[1]}}</td>
 					 <td>{{enzyme[4]}}</td>
-					 {% if enzyme[5] %}
+					 {% if enzyme[7] %}
+					 <td>Both</td>
+					 {% elif enzyme[5] %}
 					 <td>Bottom</td>
 					 {% else %}
 					 <td>Top</td>

@@ -195,6 +195,11 @@ class EnzymeChooser:
     def __enzymeLength(self, enzyme):
         return len(enzyme) - enzyme.count("N")
 
+    def __isPalindrome(self, sequence):
+        print(sequence)
+        if sequence == Seq(sequence).reverse_complement():
+            return True
+        return False
     # only public function, runs all the other functions to
     # get the final product
     def getEnzymes(self, outList):
@@ -224,9 +229,12 @@ class EnzymeChooser:
         # insert underline and bolded (html format) for the enzyme site
         for key in self.enzymes:
             e = self.enzymes[key]
+            # get the site to see if the sequence is a __isPalindrome
+            enzymeSite = e[4][e[3]:e[3]+len(e[1])]
+            isPalindrome = self.__isPalindrome(enzymeSite)
+            # markup the sequence in html
             e[4] = self.__markup(e[4], e[3], len(e[1]), e[5])
-        for key in self.enzymes:
-            outList.append(self.enzymes[key] + [key])
+            outList.append(self.enzymes[key] + [key] + [isPalindrome])
         outList.sort(key = lambda x:self.__getStartIndex(x))
 
 # function to write the user data to a text files
@@ -274,7 +282,7 @@ def index():
                 or len(sequence) == 0):
             errorMessage += "Name, Affiliation, Organism, and Sequence are " \
                 "required.\n"
-        if len(sequence) > 100:
+        if len(sequence) >= 100:
             errorMessage += "The sequence must be less than 100 base pairs.\n"
         if len(sequence) % 3 != 0:
             errorMessage += "Please make sure sequence is in frame and has a length" \
@@ -299,7 +307,7 @@ def index():
             #return Response(chooser.getEnzymes(), mimetype= 'text/event-stream')
             flash("this could take a few minutes")
             chooser.getEnzymes(enzymes)
-            print(enzymes)
+            #rint(enzymes)
             return render_template("index.html", hasResults=True,
                 enzymes=enzymes)
     return render_template("index.html", hasResults=False, hasErrors=False)
