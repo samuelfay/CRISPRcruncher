@@ -1,0 +1,99 @@
+<!DOCTYPE HTML>
+<!--
+	Ex Machina by TEMPLATED
+    templated.co @templatedco
+    Released for free under the Creative Commons Attribution 3.0 license (templated.co/license)
+	Modified for CRISPRcruncher by Samuel Fay
+-->
+<html style="height:100%;">
+	<head>
+		<title>CRISPRcruncher</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:700italic,400,300,700' rel='stylesheet' type='text/css'>
+		<!--[if lte IE 8]><script src="js/html5shiv.js"></script><![endif]-->
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+		<!--<script src="static/js/skel.min.js"></script>
+		<script src="static/js/skel-panels.min.js"></script>
+		<script src="static/js/init.js"></script>-->
+			<link rel="stylesheet" type="text/css" href="/static/css/skel-noscript.css" />
+			<link rel="stylesheet" type="text/css" href="/static/css/style.css" />
+			<link rel="stylesheet" type="text/css" href="/static/css/style-desktop.css" />
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
+	</head>
+	<body class="homepage" style="display:flex;flex-direction:column;height:100%">
+
+	<!-- Header -->
+	  <div id="content" style="flex:1 0 auto;">
+		<div id="header">
+			<div class="container">
+
+				<!-- Logo -->
+					<div id="logo">
+						<h1><a href="/">CRISPRcruncher</a></h1>
+					</div>
+
+				<!-- Nav -->
+					<nav id="nav">
+						<ul>
+							<li class="inactive"><a href="/">Home</a></li>
+							<li class="inactive"><a href="/feedback">Feedback</a></li>
+              <li class="active"><a href="/instructions">Instructions</a></li>
+						</ul>
+					</nav>
+
+			</div>
+		</div>
+	<!-- Header -->
+
+	<!-- Banner -->
+
+	<!-- /Banner -->
+
+	<!-- Main -->
+		<div id="page" style="padding: 0.5em 17% 0.5em 17%;">
+			<h1 class="instructions">Introduction</h1>
+      <p class="instructions">CRISPRcruncher takes a DNA sequence up to 99 base pairs in length, which encodes a peptide (up to 33 amino acids in length) and reports all possible restriction sites that could be created by changing one or more nucleotides while preserving the original peptide sequence. The tool takes advantage of the redundancy in the genetic code along with a built-in library of 643 commercially available enzymes. Note that commercially available enzymes may change with time and that certain enzymes may not be available in all countries. <br><br> The reports for creating a new sites always show the most parsimonious solution (i.e., the fewest possible substitutions). The report also indicates if the restriction site corresponds to the entered top strand, the bottom complementary strand, or to both, as in the case of palindromic sequences (e.g., GAATTC). CRISPRcruncher will also report restriction sites that are already present in the original sequence, but does not provide suggestions for altering such sites, as this is easy to do manually.</p><br><br>
+      <h1 class="instructions">Directions</h1>
+      <ol class="instructions">
+        <li>Enter some personal information, then <span class="instructions">enter a nucleotide sequence up to 99 base pairs in length</span>.</li>
+        <li><span class="instructions">The sequence length must be a multiple of 3</span>.</li>
+        <li>To provide a useful output, <span class="instructions">the entered sequence must start out in the correct frame</span>. For example, if the first amino acid is methionine, then the first three nucleotides of the sequence should be ATG. Note that stop codons are treated identically to amino-acid codons by the tool. </li>
+        <li><span class="instructions">Choose a minimum length recognition sequence</span> for the reported restriction-enzyme sites. Choosing 4 (i.e., 4-cutters and larger) will give you the most options. Choosing 5 or more will provide fewer options, but those it provides may be the more useful ones. Note that the sequence CCGG and CCNNNNGG are both considered to be 4-cutters. Additionally, non-specific nucleotide designations, such as R and Y, are counted the same as G, A, T, C. For example, AARYTT is considered to be a 6-cutter. </li>
+      </ol><br><br>
+      <h1 class="instructions">Output</h1>
+      <p class="instructions"></p>
+      <img src="static/images/outputExample.jpeg" style="width:100%;">
+      <p class="instructions">An example output for a 15 bp DNA sequence (5’–ATAGTGGATAAACCG–3’) encoding a 5 aa peptide (IVDKP) is shown above. In this case, 4-cutters and up were chosen.</p>
+      <ul class="instructions">
+        <li>Nucleotides in <b>BOLD</b> indicate the restriction enzyme site.</li>
+        <li>Nucleotides in <b><span style="color:#e93c73;">RED</span></b> indicate the residues that were changed to create the new restriction site.</li>
+        <li>Both the enzyme name and the consensus recognition sequence are shown.</li>
+        <li>For “bottom strand” (non-palindromic) enzymes, the recognition site will be the reverse complement of the displayed top strand sequence.</li>
+        <li>Isoschizomers, different enzymes that have the same recognition sequence, are displayed on different lines.</li>
+        <li>In the case of enzymes containing non-specific nucleotides (e.g., R,Y) as part of their recognition sequence, only one example sequence is displayed provided. However, know that there may be additional iterations that could potentially work.</li>
+      </ul><br><br>
+      <h1 class="instructions">What CRISPRcruncher Does Not Do</h1>
+      <ol class="instructions">
+        <li>CRISPRcruncher will not suggest a PAM site. Other tools are available to “help” with this, and the optimal PAM/cut site will likely depend on multiple variables. It’s always something of a gamble.</li>
+        <li>CRISPRcruncher will not suggest the best location for the new restriction site or the best configuration for the various changes you may wish to make as part of your repair template design. As for the PAM site, this part of the process can depend on multiple variables and you will want to consult the latest CRISPR literature.</li>
+        <li>CRISPRcruncher will not provide specific suggestions for ablating a site already present in the starting sequence. This is easy enough to do manually.</li>
+        <li>CRISPRcruncher does not take into account possible codon bias (codon usage frequency). This issue varies from organism to organism and is one of the multiple variables that may need to be factored into your design.</li>
+        <li>CRISPRcruncher will not write your prelim, paper, thesis, grant, or do your dishes for you, despite claims to the contrary. We have no idea where those rumors even got started.</li>
+      </ol>
+    </div>
+  </div>
+	<!-- /Footer -->
+
+	<!-- Copyright -->
+		<div id="footer" style="flex-shrink: 0;padding:0em 0em 0em 0em">
+		<div id="copyright" class="container">
+			Design based off: <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>)
+		</div>
+	</div>
+
+
+	</body>
+</html>

@@ -332,5 +332,9 @@ def feedback():
             return render_template("feedback.html", submitted=True)
     return render_template("feedback.html", hasErrors=False)
 
+@app.route("/instructions")
+def instructions():
+    return render_template("instructions.html")
+
 if __name__ == "__main__":
     app.run(debug=True)
