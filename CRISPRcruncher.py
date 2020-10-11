@@ -239,14 +239,14 @@ class EnzymeChooser:
 
 # function to write the user data to a text files
 def writeUserData(name, affiliation, email, organism):
-    out = open("usersInfo.txt", "a")
+    out = open("../usersInfo.txt", "a")
     out.write("\n" + name + "\t" + affiliation + "\t" + email)
     out.write("\t" + organism)
     out.close()
 
 # function to write the user feedback to a text file
 def writeFeedback(feedback):
-    out = open("feedback.txt", "a")
+    out = open("../feedback.txt", "a")
     out.write(feedback + "\n\n\n")
     out.close()
 
