@@ -282,8 +282,8 @@ def index():
                 or len(sequence) == 0):
             errorMessage += "Name, Affiliation, Organism, and Sequence are " \
                 "required.\n"
-        if len(sequence) >= 100:
-            errorMessage += "The sequence must be less than 100 base pairs.\n"
+        if len(sequence) >= 100 or len(sequence) < 15:
+            errorMessage += "The sequence must be from 15 to 99 base pairs.\n"
         if len(sequence) % 3 != 0:
             errorMessage += "Please make sure sequence is in frame and has a length" \
             " that is a multiple of 3.\n"
@@ -337,5 +337,5 @@ def instructions():
     return render_template("instructions.html")
 
 if __name__ == "__main__":
-    # app.run(debug=True)
-    app.run("host=0.0.0.0")
+    app.run(debug=True)
+    #app.run("host=0.0.0.0")
