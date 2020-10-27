@@ -196,7 +196,7 @@ class EnzymeChooser:
         return len(enzyme) - enzyme.count("N")
 
     def __isPalindrome(self, sequence):
-        print(sequence)
+        #print(sequence)
         if sequence == Seq(sequence).reverse_complement():
             return True
         return False
@@ -293,13 +293,16 @@ def index():
                     "pairs A, T, C, and G.\n"
                 break
         try:
-            int(minLength)
+            if int(minLength) < 0:
+                errorMessage += "Minimum Length must be positive.\n"
         except ValueError:
             errorMessage += "Minimum Length must be an integer.\n"
         if len(errorMessage) > 0:
             errorMessage = errorMessage.rstrip("\n")
             return render_template("index.html", hasResults=False,
-                hasErrors=True, errorMessage=errorMessage)
+                hasErrors=True, errorMessage=errorMessage, name=name,
+                 affiliation=affiliation, email=email, organism=organism,
+                 sequence=sequence, minLength=minLength)
         else:
             writeUserData(name, affiliation, email, organism)
             enzymes = []
@@ -337,5 +340,5 @@ def instructions():
     return render_template("instructions.html")
 
 if __name__ == "__main__":
-    #app.run(debug=True)
-    app.run("host=0.0.0.0")
+    app.run(debug=True)
+    #app.run("host=0.0.0.0")

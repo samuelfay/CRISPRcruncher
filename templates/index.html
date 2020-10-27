@@ -71,21 +71,51 @@
 			 <form method="post">
 			 <div class="form-group">
 				 <ul class="style1" pad>
-				 <input type="text" name="name" placeholder="Your Name"
-									 class="form-control mainFormInput" >
-				 <input type="text" name="affiliation" placeholder="Affiliation"
-										class="form-control mainFormInput">
+					 {% if name %}
+				 	 <input type="text" name="name" placeholder="Your Name"
+									 class="form-control mainFormInput" value={{name}}>
+					 {% else %}
+					 <input type="text" name="name" placeholder="Your Name"
+	 									 class="form-control mainFormInput">
+					 {% endif %}
+					 {% if affiliation %}
+				   <input type="text" name="affiliation" placeholder="Affiliation"
+										class="form-control mainFormInput" value={{affiliation}}>
+					 {% else %}
+					  <input type="text" name="affiliation" placeholder="Affiliation"
+ 										class="form-control mainFormInput">
+					  {% endif %}
 				</ul>
 				<ul class="style1">
+				{% if email %}
+				<input type="text" name="email" placeholder="Email (optional)"
+									class="form-control mainFormInput" value={{email}}>
+				{% else %}
 				<input type="text" name="email" placeholder="Email (optional)"
 									class="form-control mainFormInput">
+				{% endif %}
+				{% if organism %}
+				<input type="text" name="organism" placeholder="Organism"
+									class="form-control mainFormInput" value={{organism}}>
+				{% else %}
 				<input type="text" name="organism" placeholder="Organism"
 									class="form-control mainFormInput">
+				{% endif %}
 				</ul>
+					 {% if sequence %}
+					 <input name="sequence" placeholder="Enter Input Sequence"
+										 class="form-control mainFormInput" style="width:99%" value={{sequence}}>
+					 {% else %}
 					 <input name="sequence" placeholder="Enter Input Sequence"
 										 class="form-control mainFormInput" style="width:99%">
+					 {% endif %}
+					 {% if minLength %}
+					 <input name="minLength" placeholder="Minimum Recognition Length"
+										 class="form-control mainFormInput" style="width:99%" value={{minLength}}>
+					 {% else %}
 					 <input name="minLength" placeholder="Minimum Recognition Length"
 										 class="form-control mainFormInput" style="width:99%">
+					 {% endif %}
 					{% if hasErrors %}
 					<p style="color:red">{{errorMessage}}</p>
 					{% endif %}
