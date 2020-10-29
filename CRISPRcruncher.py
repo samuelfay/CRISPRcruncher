@@ -253,6 +253,8 @@ def writeFeedback(feedback):
     # input = "GATCGATGGGCCTATATAGGATCGAAAATC"
 enzymesFile = "enzymes.txt"
 windowLength = 15
+organismsList = ["Worms (the best)", "Insects", "Fish", "Mammals",
+    "Plants", "Amphibians", "Bacteria", "Archaea", "Something Really Weird"]
 # chooser = EnzymeChooser(input, enzymesFile, windowLength)
 # enzymes = chooser.getEnzymes()
 # found = 0
@@ -292,15 +294,19 @@ def index():
                 errorMessage += "The sequence must only contain the base " \
                     "pairs A, T, C, and G.\n"
                 break
+        if organism == "default":
+            errorMessage += "Please choose an organism from the dropdown.\n"
         try:
             if int(minLength) < 0:
                 errorMessage += "Minimum Length must be positive.\n"
         except ValueError:
             errorMessage += "Minimum Length must be an integer.\n"
+        print(organism)
         if len(errorMessage) > 0:
             errorMessage = errorMessage.rstrip("\n")
             return render_template("index.html", hasResults=False,
-                hasErrors=True, errorMessage=errorMessage, name=name,
+                hasErrors=True, errorMessage=errorMessage,
+                organismsList=organismsList, name=name,
                  affiliation=affiliation, email=email, organism=organism,
                  sequence=sequence, minLength=minLength)
         else:
@@ -312,8 +318,9 @@ def index():
             chooser.getEnzymes(enzymes)
             #rint(enzymes)
             return render_template("index.html", hasResults=True,
-                enzymes=enzymes)
-    return render_template("index.html", hasResults=False, hasErrors=False)
+                enzymes=enzymes, organismsList=organismsList)
+    return render_template("index.html", hasResults=False, hasErrors=False,
+        organismsList=organismsList)
 
 @app.route("/feedback", methods=("GET", "POST"))
 def feedback():

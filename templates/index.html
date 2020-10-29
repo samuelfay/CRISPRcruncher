@@ -17,11 +17,30 @@
 		<script>
 		window.onload = function() {
 			document.getElementById("loadingDiv").style.display = "none";
+			var organism = document.getElementById("organism");
+			if (organism.value != "default") {
+				organism.style.color = "black";
+			}
+			for (var i=0; i < organism.options.length; i++) {
+				organism.options[i].style.color = "black";
+			}
 		}
 		function showLoading() {
 			document.getElementById("main-form").style.display = "none";
 			document.getElementById("loadingDiv").style.display = "flex";
 			return true;
+		}
+		function changeSelectColor() {
+			if (document.getElementById("organism").value == "default") {
+				document.getElementById("organism").style.color= "gray";
+				for (var i=0; i < document.getElementById("organism").options.length; i++) {
+					document.getElementById("organism").options[i].style.color = "black";
+				}
+			}
+			else {
+				document.getElementById("organism").style.color= "black";
+
+			}
 		}
 		</script>
 		<!--<script src="static/js/skel.min.js"></script>
@@ -95,11 +114,25 @@
 									class="form-control mainFormInput">
 				{% endif %}
 				{% if organism %}
-				<input type="text" name="organism" placeholder="Organism"
-									class="form-control mainFormInput" value={{organism}}>
+				<select type="text" style="color:gray" id="organism" name="organism" placeholder="Organism"
+									class="form-control mainFormInputSelect" onchange="changeSelectColor()">
+				{% if organism == "default" %}
+				<option selected hidden value="default">Organism (choose one)</option>
+				{% endif %}
+				{% for org in organismsList %}
+				{% if org == organism %}
+				<option value="{{org}}" selected>{{org}}</option>
 				{% else %}
-				<input type="text" name="organism" placeholder="Organism"
-									class="form-control mainFormInput">
+				<option value="{{org}}">{{org}}</option>
+				{% endif %}
+				{% endfor %}
+				{% else %}
+				<select type="text" style="color:gray" name="organism" id="organism" placeholder="Organism"
+									class="form-control mainFormInputSelect" onchange="changeSelectColor()">
+				<option selected hidden value="default">Organism (choose one)</option>
+				{% for org in organismsList %}
+				<option value="{{org}}">{{org}}</option>
+				{% endfor %}
 				{% endif %}
 				</ul>
 					 {% if sequence %}
@@ -132,7 +165,7 @@
 			<div class="loadingio-spinner-disk-qrhes6hy5bg"><div class="ldio-ye9xf5zbmp">
 <div><div></div><div></div></div>
 </div></div>
-			<p><b style="font-size: 1.5em">This could take a minute.</b></p>
+			<p><b style="font-size: 1.5em">This could take a few minutes.</b></p>
 		</div>
 			{% endif %}
 			 {% if hasResults %}

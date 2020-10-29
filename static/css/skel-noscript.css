@@ -45,11 +45,39 @@
 			font-size: 1.3em;
 			padding: 0.4em;
 			margin: 0.1em 0.1em 0.1em 0.1em;
+			line-height: normal
 		}
 		.mainFormInput:focus	{
     box-shadow: 0 0 3px #5c3ce9;
     outline-offset: 0px;
 	  }
+
+		.mainFormInputSelect {
+			border-style: solid;
+  		border-width: 1px;
+			border-color: #5c3ce9;
+			border-radius: 6px;
+			font-size: 1.3em;
+			padding: 0.4em;
+			margin: 0.1em 0.1em 0.1em 0.1em;
+			line-height: normal
+		}
+		.mainFormInputSelect:focus	{
+    box-shadow: 0 0 3px #5c3ce9;
+    outline-offset: 0px;
+	  }
+		.mainFormInputSelect:after {
+			content: '\25BC' !important;
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      padding: 0 1em;
+      background: #34495E;
+      pointer-events: none;
+		}
+
+
 
 /* Grid */
 
