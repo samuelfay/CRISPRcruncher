@@ -26,6 +26,18 @@ class EnzymeChooser:
         "M": ["A", "C"],
         "K": ["G", "T"],
     }
+    # class that stores all the necessary information for the enzymes
+    class Enzyme:
+        def __init(self, name, bindingSeq, shortBindingSeq, windowPermutations,
+            startingIndicies, overallPermutations, isReversedList):
+            self.name = name
+            self.bindingSeq = bindingSeq
+            self.shortBindingSeq = shortBindingSeq
+            # each list has an index for each window
+            self.windowPermutations = windowPermutations
+            self.startingIndicies = startingIndicies
+            self.overallPermutations = overallPermutations
+            self.isReversedList = isReversedList
     def __init__(self, inputSeq, enzymeFile, windowLength, minEnzymeLength):
         # dictionary of codons to amino acids
         self.fwdTable = CodonTable.standard_dna_table.forward_table
@@ -45,9 +57,10 @@ class EnzymeChooser:
         # N's have been stripped from the sequence.
         # if the starting index is -1, then the enzyme hasn't been found
         self.enzymes = {}
-        # variables for the start and end of the window
+        # variables for the number, start, and end of the window
         self.windowStart = 0
         self.windowEnd = 0
+        self.currentWindow = 0
 
     # make a dictionary of enzymes and their sequences
     def __makeEnzymesDict(self):
@@ -55,8 +68,9 @@ class EnzymeChooser:
         for line in enzymeLineList:
             splitLine = line.split()
             # key: enzyme, value: sequence
-            self.enzymes[splitLine[0]] = [splitLine[1], \
-                splitLine[1].strip("N"), "", -1, "", False]
+            self.enzymes[splitLine[0]] = Enzyme(splitLine[0], splitLine[1],
+            splitLine[1].strip("N"), [""] * self.numWindows, [-1] * self.numWindows,
+            [""] * self.numWindows, [False] * self.numWindows)
 
     # make the list of all codons that could be interchanged
     # at each codon place while keeping the overall codons the same
@@ -84,7 +98,7 @@ class EnzymeChooser:
                 return False
         return True
 
-    # since we want to make the permuation that does the least
+    # since we want to make the permuation for each window that does the least
     # work for each enzyme, we want the sequence that is closest
     # to the original sequence
     def __calculateSequenceDifferences(self, sequence):
@@ -109,37 +123,41 @@ class EnzymeChooser:
             # iterate through every enzyme
             for key in self.enzymes:
                 currentEnzyme = self.enzymes[key]
-                enzymeLength = len(currentEnzyme[1])
+                enzymeLength = len(currentEnzyme.shortBindingSeq)
                 # get the length without the N'
-                trueLength = self.__enzymeLength(currentEnzyme[1])
+                trueLength = self.__enzymeLength(currentEnzyme.shortBindingSeq)
                 # if the enzyme won't fit, or, its shorter than the min length
                 # we move on to the next
                 if enzymeLength > lengthLeft or trueLength < self.minEnzymeLength:
                     continue
-                if self.__compareSequences(sequence[i:i+enzymeLength], currentEnzyme[1]):
+                if self.__compareSequences(sequence[i:i+enzymeLength], currentEnzyme.shortBindingSeq):
                     # if we haven't found one yet or if the current sequence
                     # is closer to the original, then we replace it
-                    if currentEnzyme[2] == "" or \
+                    windowPermutation = currentEnzyme.windowPermutations[self.currentWindow]
+                    if (windowPermutation == "" or \
                         self.__calculateSequenceDifferences( \
-                        currentEnzyme[2]) > sequenceDiff:
+                        windowPermutation) > sequenceDiff) and \
+                        i + self.windowStart not in currentEnzyme.startingIndicies:
                         # we found one!
-                        currentEnzyme[2] = sequence
-                        currentEnzyme[3] = i + self.windowStart
-                        currentEnzyme[4] = self.inputSeq[0:self.windowStart] + \
+                        currentEnzyme.windowPermutations[self.currentWindow] = sequence
+                        currentEnzyme.startingIndicies[self.currentWindow] = i + self.windowStart
+                        currentEnzyme.overallPermutations[self.currentWindow] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
-                        currentEnzyme[5] = False
-                if self.__compareSequences(reverse[i:i+enzymeLength], currentEnzyme[1]):
+                        currentEnzyme.isReversedList[self.currentWindow] = False
+                if self.__compareSequences(reverse[i:i+enzymeLength], currentEnzyme.shortBindingSeq):
                     # if we haven't found one yet or if the current sequence
                     # is closer to the original, then we replace it
-                    if currentEnzyme[2] == "" or \
+                    windowPermutation = currentEnzyme.windowPermutations[self.currentWindow]
+                    if (windowPermutation == "" or \
                         self.__calculateSequenceDifferences( \
-                        currentEnzyme[2]) > sequenceDiff:
+                        windowPermutation) > sequenceDiff) and \
+                        i + self.windowStart not in currentEnzyme.startingIndicies:
                         # we found one, but it's on the other side!
-                        currentEnzyme[2] = sequence
-                        currentEnzyme[3] = self.windowEnd - i - 1
-                        currentEnzyme[4] = self.inputSeq[0:self.windowStart] + \
+                        currentEnzyme.windowPermutations[self.currentWindow] = sequence
+                        currentEnzyme.startingIndicies[self.currentWindow] = self.windowEnd - i - 1
+                        currentEnzyme.overallPermutations[self.currentWindow] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
-                        currentEnzyme[5] = True
+                        currentEnzyme.isReversedList[self.currentWindow] = True
 
     # recursive function that goes through possible permutations
     # of each scrolling window
@@ -206,11 +224,10 @@ class EnzymeChooser:
         self.__makeEnzymesDict()
         self.windowStart = 0
         self.windowEnd = self.windowLength
-        currentWindow = 0
+        self.currentWindow = 0
         # while the moving window doesn't hit the end
         while (self.windowEnd <= len(self.inputSeq)):
-            flash(str(currentWindow) + "/" + str(self.numWindows))
-            currentWindow += 1
+            self.currentWindow += 1
             # get the current base pairs in the window
             slice = self.inputSeq[self.windowStart:self.windowEnd]
             #print(slice)
@@ -218,14 +235,6 @@ class EnzymeChooser:
             self.__permutate([], 0)
             self.windowStart += 3
             self.windowEnd += 3
-        tempDict = self.enzymes
-        #print(tempDict)
-        self.enzymes = {}
-        # remove enzymes that weren't found, and enzymes below the min length
-        for key in tempDict:
-            if (tempDict[key][3] != -1 and
-            self.__enzymeLength(tempDict[key][1]) >= self.minEnzymeLength):
-                self.enzymes[key] = tempDict[key]
         # insert underline and bolded (html format) for the enzyme site
         for key in self.enzymes:
             e = self.enzymes[key]
@@ -314,11 +323,20 @@ def index():
             enzymes = []
             chooser = EnzymeChooser(sequence, enzymesFile, 15, int(minLength))
             #return Response(chooser.getEnzymes(), mimetype= 'text/event-stream')
-            flash("this could take a few minutes")
             chooser.getEnzymes(enzymes)
             #rint(enzymes)
             return render_template("index.html", hasResults=True,
-                enzymes=enzymes, organismsList=organismsList)
+                enzymes=enzymes, organismsList=organismsList,
+                name=name,
+                 affiliation=affiliation, email=email, organism=organism,
+                 sequence=sequence, minLength=minLength)
+    # if there are url parameters to fill the form fields
+    if len(request.args) == 6:
+        return render_template("index.html", hasResults=False, hasErrors=False,
+            organismsList=organismsList, name=request.args["name"],
+             affiliation=request.args["affiliation"], email=request.args["email"],
+             organism=request.args["organism"],
+             sequence=request.args["sequence"], minLength=request.args["minLength"])
     return render_template("index.html", hasResults=False, hasErrors=False,
         organismsList=organismsList)
 

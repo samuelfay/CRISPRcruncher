@@ -42,13 +42,23 @@
 
 			}
 		}
+
+		if ({{hasResults}}) {
+			history.pushState(null, null, '<?php echo $_SERVER["REQUEST_URI"]; ?>');
+			window.addEventListener('popstate', function(event) {
+    		window.location.href = '/?name={{name}}'+
+ 			 '&affiliation={{affiliation}}&email={{email}}'+
+ 			 '&organism={{organism}}&sequence={{sequence}}'+
+ 			 '&minLength={{minLength}}';
+});
+		}
 		</script>
 		<!--<script src="static/js/skel.min.js"></script>
 		<script src="static/js/skel-panels.min.js"></script>
 		<script src="static/js/init.js"></script>-->
-			<link rel="stylesheet" type="text/css" href="/static/css/skel-noscript.css" />
-			<link rel="stylesheet" type="text/css" href="/static/css/style.css" />
-			<link rel="stylesheet" type="text/css" href="/static/css/style-desktop.css" />
+			<link rel="stylesheet" type="text/css" href="/static/css/skel-noscript.css?modified=1229" />
+			<link rel="stylesheet" type="text/css" href="/static/css/style.css?modified=1229" />
+			<link rel="stylesheet" type="text/css" href="/static/css/style-desktop.css?modified=1229" />
 		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
 		<!--[if lte IE 9]><link rel="stylesheet" href="css/ie/v9.css" /><![endif]-->
 	</head>
@@ -114,8 +124,8 @@
 									class="form-control mainFormInput">
 				{% endif %}
 				{% if organism %}
-				<select type="text" style="color:gray" id="organism" name="organism" placeholder="Organism"
-									class="form-control mainFormInputSelect" onchange="changeSelectColor()">
+				<select type="text" style="color:gray;width:36.6%;" id="organism" name="organism" placeholder="Organism"
+									class="form-control mainFormInputSelect" onchange="changeSelectColor()" width="36.6%;">
 				{% if organism == "default" %}
 				<option selected hidden value="default">Organism (choose one)</option>
 				{% endif %}
@@ -127,7 +137,7 @@
 				{% endif %}
 				{% endfor %}
 				{% else %}
-				<select type="text" style="color:gray" name="organism" id="organism" placeholder="Organism"
+				<select type="text" style="color:gray;width:36.6%;" name="organism" id="organism" placeholder="Organism"
 									class="form-control mainFormInputSelect" onchange="changeSelectColor()">
 				<option selected hidden value="default">Organism (choose one)</option>
 				{% for org in organismsList %}
@@ -170,10 +180,13 @@
 			{% endif %}
 			 {% if hasResults %}
 			 <div id="tableTitle" style="display:flex;align-content:row;margin-left:10%;margin-bottom:0.5em">
-			 <button type="button" class="button" style="font-size:1em" onclick="window.location.href='/';"
+			 <button type="button" class="button" style="font-size:1em" onclick="window.location.href='/?name={{name}}'+
+			 '&affiliation={{affiliation}}&email={{email}}'+
+			 '&organism={{organism}}&sequence={{sequence}}'+
+			 '&minLength={{minLength}}';"
 			 >&#x25c0; Back</button>
-			 <h1 class="results" style="align-self:center;margin-top:0.5em;margin-left:30%;">
-				 RESULTS ({{enzymes|length}} enzymes)</h1>
+			 <h1 class="results" style="align-self:center;margin-top:0.5em;margin-left:20%;">
+				 {{enzymes|length}} Results for {{sequence}}</h1>
 		 	</div>
 			 <table class="resultsTable">
 				 <tr>
