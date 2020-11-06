@@ -6,6 +6,25 @@ from Bio.Seq import Seq
 from flask import Flask, render_template, request, url_for, flash, redirect
 from flask import Markup, Response
 
+
+# class that stores all the necessary information for the enzymes
+class Enzyme:
+    def __init__(self, name, bindingSeq, shortBindingSeq, windowPermutations,
+        startingIndicies, overallPermutations, isReversedList):
+        self.name = name
+        self.bindingSeq = bindingSeq
+        self.shortBindingSeq = shortBindingSeq
+        # each list has an index for each window
+        self.windowPermutations = windowPermutations
+        self.startingIndicies = startingIndicies
+        self.overallPermutations = overallPermutations
+        self.isReversedList = isReversedList
+    def toList(self):
+        return [self.name, self.bindingSeq, self.shortBindingSeq,
+        self.windowPermutations, self.startingIndicies, self.overallPermutations,
+        self.isReversedList]
+
+
 # Class that looks through all of the permutations of the input
 # sequence that keeps the overall codon output the same. It then
 # looks through a whitespace separated file on enzymes and their
@@ -26,25 +45,13 @@ class EnzymeChooser:
         "M": ["A", "C"],
         "K": ["G", "T"],
     }
-    # class that stores all the necessary information for the enzymes
-    class Enzyme:
-        def __init(self, name, bindingSeq, shortBindingSeq, windowPermutations,
-            startingIndicies, overallPermutations, isReversedList):
-            self.name = name
-            self.bindingSeq = bindingSeq
-            self.shortBindingSeq = shortBindingSeq
-            # each list has an index for each window
-            self.windowPermutations = windowPermutations
-            self.startingIndicies = startingIndicies
-            self.overallPermutations = overallPermutations
-            self.isReversedList = isReversedList
     def __init__(self, inputSeq, enzymeFile, windowLength, minEnzymeLength):
         # dictionary of codons to amino acids
         self.fwdTable = CodonTable.standard_dna_table.forward_table
         self.inputSeq = inputSeq
         self.enzymeFile = enzymeFile
         self.windowLength = windowLength
-        self.numWindows = (len(self.inputSeq) - self.windowLength) / 3
+        self.numWindows = int((len(self.inputSeq) - self.windowLength) / 3 + 1)
         self.minEnzymeLength = minEnzymeLength
         # list for current permutations
         self.permutationsList = []
@@ -227,7 +234,6 @@ class EnzymeChooser:
         self.currentWindow = 0
         # while the moving window doesn't hit the end
         while (self.windowEnd <= len(self.inputSeq)):
-            self.currentWindow += 1
             # get the current base pairs in the window
             slice = self.inputSeq[self.windowStart:self.windowEnd]
             #print(slice)
@@ -235,15 +241,22 @@ class EnzymeChooser:
             self.__permutate([], 0)
             self.windowStart += 3
             self.windowEnd += 3
+            self.currentWindow += 1
         # insert underline and bolded (html format) for the enzyme site
         for key in self.enzymes:
             e = self.enzymes[key]
             # get the site to see if the sequence is a __isPalindrome
-            enzymeSite = e[4][e[3]:e[3]+len(e[1])]
-            isPalindrome = self.__isPalindrome(enzymeSite)
-            # markup the sequence in html
-            e[4] = self.__markup(e[4], e[3], len(e[1]), e[5])
-            outList.append(self.enzymes[key] + [key] + [isPalindrome])
+            for i in range(len(e.startingIndicies)):
+                if e.startingIndicies[i] == -1:
+                    continue
+                permutation = e.overallPermutations[i]
+                startIndex = e.startingIndicies[i]
+                enzymeSite = permutation[startIndex:startIndex+len(e.shortBindingSeq)]
+                isPalindrome = self.__isPalindrome(enzymeSite)
+                # markup the sequence in html
+                e.overallPermutations[i] = self.__markup(permutation, startIndex
+                    , len(e.shortBindingSeq), e.isReversedList[i])
+                outList.append(self.enzymes[key] + [key] + [isPalindrome])
         outList.sort(key = lambda x:self.__getStartIndex(x))
 
 # function to write the user data to a text files
