@@ -341,6 +341,11 @@ def index():
                  sequence=sequence, minLength=minLength)
         else:
             writeUserData(name, affiliation, email, organism)
+            resultsSequence = ""
+            if len(sequence) > 30:
+                resultsSequence = sequence[0:30] + "..."
+            else:
+                resultsSequence = sequence
             enzymes = []
             chooser = EnzymeChooser(sequence, enzymesFile, 15, int(minLength))
             #return Response(chooser.getEnzymes(), mimetype= 'text/event-stream')
@@ -350,7 +355,8 @@ def index():
                 enzymes=enzymes, organismsList=organismsList,
                 name=name,
                  affiliation=affiliation, email=email, organism=organism,
-                 sequence=sequence, minLength=minLength)
+                 sequence=sequence, resultsSequence=resultsSequence,
+                 minLength=minLength)
     # if there are url parameters to fill the form fields
     if len(request.args) == 6:
         return render_template("index.html", hasResults=False, hasErrors=False,
