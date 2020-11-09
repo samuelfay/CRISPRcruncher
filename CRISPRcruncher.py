@@ -19,10 +19,10 @@ class Enzyme:
         self.startingIndicies = startingIndicies
         self.overallPermutations = overallPermutations
         self.isReversedList = isReversedList
-    def toList(self):
+    def toList(self, index):
         return [self.name, self.bindingSeq, self.shortBindingSeq,
-        self.windowPermutations, self.startingIndicies, self.overallPermutations,
-        self.isReversedList]
+        self.windowPermutations[index], self.startingIndicies[index], self.overallPermutations[index],
+        self.isReversedList[index]]
 
 
 # Class that looks through all of the permutations of the input
@@ -123,8 +123,6 @@ class EnzymeChooser:
         # check for every enzyme starting at every character in slice
         seqObj = Seq(sequence)
         reverse = str(seqObj.reverse_complement())
-        #print(sequence)
-        #print(reverse)
         for i in range(len(sequence)):
             lengthLeft = self.windowLength - i
             # iterate through every enzyme
@@ -141,16 +139,23 @@ class EnzymeChooser:
                     # if we haven't found one yet or if the current sequence
                     # is closer to the original, then we replace it
                     windowPermutation = currentEnzyme.windowPermutations[self.currentWindow]
+                    if currentEnzyme.name == "TaqII" and (sequence == "GATCGATGGGCCTAT"
+                        or sequence == "GACCGATGGGCTTAT"):
+                        print("Window Permutation: ", windowPermutation)
+                        print("sequence: ", sequence)
+                        print("sequenceDiff: ", sequenceDiff)
                     if (windowPermutation == "" or \
                         self.__calculateSequenceDifferences( \
                         windowPermutation) > sequenceDiff) and \
-                        i + self.windowStart not in currentEnzyme.startingIndicies:
+                        i + self.windowStart not in currentEnzyme.startingIndicies[0:self.currentWindow]:
                         # we found one!
                         currentEnzyme.windowPermutations[self.currentWindow] = sequence
                         currentEnzyme.startingIndicies[self.currentWindow] = i + self.windowStart
                         currentEnzyme.overallPermutations[self.currentWindow] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
                         currentEnzyme.isReversedList[self.currentWindow] = False
+                        if currentEnzyme.name == "TaqII":
+                            print(currentEnzyme.startingIndicies)
                 if self.__compareSequences(reverse[i:i+enzymeLength], currentEnzyme.shortBindingSeq):
                     # if we haven't found one yet or if the current sequence
                     # is closer to the original, then we replace it
@@ -158,10 +163,12 @@ class EnzymeChooser:
                     if (windowPermutation == "" or \
                         self.__calculateSequenceDifferences( \
                         windowPermutation) > sequenceDiff) and \
-                        i + self.windowStart not in currentEnzyme.startingIndicies:
+                        (self.windowEnd - i - len(currentEnzyme.shortBindingSeq)
+                        not in currentEnzyme.startingIndicies[0:self.currentWindow]):
                         # we found one, but it's on the other side!
                         currentEnzyme.windowPermutations[self.currentWindow] = sequence
-                        currentEnzyme.startingIndicies[self.currentWindow] = self.windowEnd - i - 1
+                        currentEnzyme.startingIndicies[self.currentWindow] = (self.windowEnd - i
+                            - len(currentEnzyme.shortBindingSeq))
                         currentEnzyme.overallPermutations[self.currentWindow] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
                         currentEnzyme.isReversedList[self.currentWindow] = True
@@ -199,8 +206,6 @@ class EnzymeChooser:
     def __markup(self, sequence, startIndex, enzymeLength, isReversed):
         out = ""
         # modify the start index if it's reversed
-        if isReversed:
-            startIndex = startIndex - enzymeLength + 1
         for i in range(len(self.inputSeq)):
             # if this is the start of the enzyme sites
             if i == startIndex:
@@ -246,9 +251,11 @@ class EnzymeChooser:
         for key in self.enzymes:
             e = self.enzymes[key]
             # get the site to see if the sequence is a __isPalindrome
+            numbersFound = 0
             for i in range(len(e.startingIndicies)):
                 if e.startingIndicies[i] == -1:
                     continue
+                numbersFound += 1
                 permutation = e.overallPermutations[i]
                 startIndex = e.startingIndicies[i]
                 enzymeSite = permutation[startIndex:startIndex+len(e.shortBindingSeq)]
@@ -256,8 +263,10 @@ class EnzymeChooser:
                 # markup the sequence in html
                 e.overallPermutations[i] = self.__markup(permutation, startIndex
                     , len(e.shortBindingSeq), e.isReversedList[i])
-                outList.append(self.enzymes[key] + [key] + [isPalindrome])
-        outList.sort(key = lambda x:self.__getStartIndex(x))
+                outList.append(e.toList(i) + [isPalindrome])
+        outList.sort(key = lambda x:x[4])
+        for item in outList:
+            print(item)
 
 # function to write the user data to a text files
 def writeUserData(name, affiliation, email, organism):
@@ -323,7 +332,6 @@ def index():
                 errorMessage += "Minimum Length must be positive.\n"
         except ValueError:
             errorMessage += "Minimum Length must be an integer.\n"
-        print(organism)
         if len(errorMessage) > 0:
             errorMessage = errorMessage.rstrip("\n")
             return render_template("index.html", hasResults=False,
