@@ -225,9 +225,11 @@ class EnzymeChooser:
     def __enzymeLength(self, enzyme):
         return len(enzyme) - enzyme.count("N")
 
-    def __isPalindrome(self, sequence):
+    def __isPalindrome(self, sequence, enzymeSeq):
         #print(sequence)
-        if sequence == Seq(sequence).reverse_complement():
+        reverseComplement = Seq(sequence).reverse_complement()
+        if self.__compareSequences(sequence, enzymeSeq) and \
+            self.__compareSequences(reverseComplement, enzymeSeq):
             return True
         return False
     # only public function, runs all the other functions to
@@ -259,7 +261,7 @@ class EnzymeChooser:
                 permutation = e.overallPermutations[i]
                 startIndex = e.startingIndicies[i]
                 enzymeSite = permutation[startIndex:startIndex+len(e.shortBindingSeq)]
-                isPalindrome = self.__isPalindrome(enzymeSite)
+                isPalindrome = self.__isPalindrome(enzymeSite, e.shortBindingSeq)
                 # markup the sequence in html
                 e.overallPermutations[i] = self.__markup(permutation, startIndex
                     , len(e.shortBindingSeq), e.isReversedList[i])
