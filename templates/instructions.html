@@ -65,15 +65,25 @@
       </ol><br><br>
       <h1 class="instructions">Output</h1>
       <p class="instructions"></p>
-      <img src="static/images/outputExample.jpeg" style="width:100%;">
-      <p class="instructions">An example output for a 15 bp DNA sequence (5’–ATAGTGGATAAACCG–3’) encoding a 5 aa peptide (IVDKP) is shown above. In this case, 4-cutters and up were chosen.</p>
+      <img src="static/images/outputExample.png" style="width:100%;">
+      <p class="instructions">An example output for a 21 bp DNA sequence (5’–ATGACCGACACACTTGATCTG–3’) encoding a 7
+aa peptide (MTDTLDL) is shown above. In this case, 6-cutters and up were chosen.</p>
       <ul class="instructions">
-        <li>Nucleotides in <b>BOLD</b> indicate the restriction enzyme site.</li>
-        <li>Nucleotides in <b><span style="color:#e93c73;">RED</span></b> indicate the residues that were changed to create the new restriction site.</li>
-        <li>Both the enzyme name and the consensus recognition sequence are shown.</li>
-        <li>For “bottom strand” (non-palindromic) enzymes, the recognition site will be the reverse complement of the displayed top strand sequence.</li>
-        <li>Isoschizomers, different enzymes that have the same recognition sequence, are displayed on different lines.</li>
-        <li>In the case of enzymes containing non-specific nucleotides (e.g., R,Y) as part of their recognition sequence, only one example sequence is displayed provided. However, know that there may be additional iterations that could potentially work.</li>
+        <li>Nucleotides in <b>BOLD</b> indicate the restriction enzyme site. In some cases (e.g., ArsI) these
+may include non-specific “spacer” residues (N).</li>
+        <li>Nucleotides in <b><span style="color:#e93c73;">RED</span></b> indicate residues that were changed to create the new restriction
+site while preserving the coding sequence. In some cases (e.g., AflIII) changes may be made just outside the enzyme recognition site to retain the original peptide sequence.</li>
+				<li>Both the enzyme name and the consensus recognition sequence are shown.</li>
+        <li>For “bottom strand” (non-reverse-palindromic) enzymes, the recognition site will be the
+reverse complement of the displayed top strand sequence.</li>
+        <li>Isoschizomers, different enzymes that have the same recognition sequence, are
+displayed on different lines. In some cases, only one may be commercially available.</li>
+        <li>In the case of enzymes containing non-specific nucleotides (e.g., R,Y) as part of their
+recognition sequence, only one example sequence is provided. However, know that
+there may be additional iterations that could potentially work.</li>
+				<li>A=Adenine G=Guanine C=Cytosine T=Thymine <br>N=Any nucleotide
+R=A or G <br>Y=C or T <br>W=A or T <br>S=G or C <br>M=A or C
+<br>K=G or T <br>B=G or C or T <br>H=A or C or T <br>D=A or G or T <br>V=A or G or C</li>
       </ul><br><br>
       <h1 class="instructions">What CRISPRcruncher Does Not Do</h1>
       <ol class="instructions">
