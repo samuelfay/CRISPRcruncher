@@ -139,11 +139,6 @@ class EnzymeChooser:
                     # if we haven't found one yet or if the current sequence
                     # is closer to the original, then we replace it
                     windowPermutation = currentEnzyme.windowPermutations[self.currentWindow]
-                    if currentEnzyme.name == "TaqII" and (sequence == "GATCGATGGGCCTAT"
-                        or sequence == "GACCGATGGGCTTAT"):
-                        print("Window Permutation: ", windowPermutation)
-                        print("sequence: ", sequence)
-                        print("sequenceDiff: ", sequenceDiff)
                     if (windowPermutation == "" or \
                         self.__calculateSequenceDifferences( \
                         windowPermutation) > sequenceDiff) and \
@@ -154,8 +149,6 @@ class EnzymeChooser:
                         currentEnzyme.overallPermutations[self.currentWindow] = self.inputSeq[0:self.windowStart] + \
                             sequence + self.inputSeq[self.windowEnd:len(self.inputSeq)]
                         currentEnzyme.isReversedList[self.currentWindow] = False
-                        if currentEnzyme.name == "TaqII":
-                            print(currentEnzyme.startingIndicies)
                 if self.__compareSequences(reverse[i:i+enzymeLength], currentEnzyme.shortBindingSeq):
                     # if we haven't found one yet or if the current sequence
                     # is closer to the original, then we replace it
@@ -267,8 +260,8 @@ class EnzymeChooser:
                     , len(e.shortBindingSeq), e.isReversedList[i])
                 outList.append(e.toList(i) + [isPalindrome])
         outList.sort(key = lambda x:x[4])
-        for item in outList:
-            print(item)
+        #for item in outList:
+        #    print(item)
 
 # function to write the user data to a text files
 def writeUserData(name, affiliation, email, organism):
@@ -394,5 +387,19 @@ def instructions():
     return render_template("instructions.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
-    #app.run("host=0.0.0.0")
+    print('''
+\n\nWelcome to CRISPRcruncher! Make sure to uncomment the correct
+line at the bottom of CRISPRcruncher.py and then cite us when you are finished
+using this tool. You can find the link to the paper on the main page or
+the instructions page. You can also use this citation:\n\n
+Fay SF, Fay DS, Chhatre VE.(2021)
+CRISPRcruncher: A tool for engineering restriction
+sites into coding regions. MicroPubl Biol. 2021 Jan
+18;2021:10.17912/micropub.biology.000343. doi:
+10.17912/micropub.biology.000343. PMID: 33490886\n\n
+''')
+    # IF RUNNING LOCALLY, UNCOMMENT THIS LINE AND COMMENT THE ONE BELOW
+    #app.run(debug=True)
+
+    # IF RUNING ON SERVER, UNCOMMENT THIS LINE AND COMMENT THE ONE ABOVE
+    app.run("host=0.0.0.0")
